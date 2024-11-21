@@ -1,5 +1,7 @@
 package muex
 
-func (h *Handler) Register() {
+import "github.com/labstack/echo/v4"
+
+func (h *Handler) Register(g *echo.Group) {
 
 }

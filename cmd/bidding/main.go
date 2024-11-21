@@ -3,8 +3,9 @@ package main
 import (
 	"os"
 
-	"github.com/kanerix/gobyd/handler"
 	"github.com/kanerix/gobyd/pkg/gobyd"
+	"github.com/kanerix/gobyd/pkg/muex"
+	"github.com/kanerix/gobyd/pkg/rest"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -16,8 +17,9 @@ func main() {
 	e.Use(middleware.Logger())
 
 	v1 := e.Group("/api/v1")
-	handler := handler.NewHandler()
-	handler.Register(v1)
+
+	rest := rest.NewHandler()
+	rest.Register(v1)
 
 	muex := muex.NewHandler()
 	muex.Register(v1)
