@@ -1,0 +1,6 @@
+logs
+.gitignore
+
+.dockerignore
+docker-compose.yml
+Dockerfile
