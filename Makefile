@@ -7,4 +7,4 @@ build:
 	@go build -o bin/bidding cmd/bidding/main.go
 
 docker-build:
-	@go build -o bin/server cmd/$(SERVICE_NAME)/main.go
+	@go build -o bin/server cmd/$(SERVICE_BIN)/main.go
