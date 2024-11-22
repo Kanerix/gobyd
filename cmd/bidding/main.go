@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	_ "embed"
 
-	"github.com/kanerix/gobyd/pkg/muex"
 	"github.com/kanerix/gobyd/pkg/rest"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -18,6 +18,8 @@ var serversRaw string
 
 func main() {
 	e := echo.New()
+
+	servers := strings.Split(serversRaw, "\n")
 
 	name := os.Getenv("SERVICE_NAME")
 	if len(name) < 1 {
@@ -33,14 +35,10 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 		Output: f,
-	},
-	))
-
-	muex := muex.NewHandler()
-	muex.Register(e)
+	}))
 
 	api := e.Group("/api")
-	rest := rest.NewHandler()
+	rest := rest.NewHandler(servers)
 	rest.Register(api)
 
 	addr := os.Getenv("SERVICE_ADDR")

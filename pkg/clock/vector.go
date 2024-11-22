@@ -29,3 +29,11 @@ func (vc VClock) TickProcess(nodeID uuid.UUID) {
 func (vc VClock) SetTick(nodeID uuid.UUID, tick uint64) {
 	vc[nodeID] = tick
 }
+
+// Merges the tick of two clocks.
+func (vc VClock) MergeTicks(other VClock) {
+	for nodeID, otherTick := range other {
+		thisTick := vc[nodeID]
+		vc[nodeID] = max(thisTick, otherTick)
+	}
+}
