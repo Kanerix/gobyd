@@ -10,12 +10,22 @@ func NewVClock() VClock {
 }
 
 // Get the tick of a process in the vector clock (if exists).
-func (vc VClock) GetProcess(pid uuid.UUID) (uint64, bool) {
-	tick, ok := vc[pid]
+func (vc VClock) GetProcess(nodeID uuid.UUID) (uint64, bool) {
+	tick, ok := vc[nodeID]
+	if !ok {
+		vc[nodeID] = 0
+		tick = 0
+	}
+
 	return tick, ok
 }
 
-// Increment the tick of a process in the vector clock
-func (vc VClock) TickProcess(pid uuid.UUID) {
-	vc[pid] += 1
+// Increment the tick of a process in the vector clock.
+func (vc VClock) TickProcess(nodeID uuid.UUID) {
+	vc[nodeID] += 1
+}
+
+// Set the tick of a node in the vector clock.
+func (vc VClock) SetTick(nodeID uuid.UUID, tick uint64) {
+	vc[nodeID] = tick
 }

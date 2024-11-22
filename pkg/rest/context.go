@@ -1,4 +1,4 @@
-package gobyd
+package rest
 
 import (
 	"github.com/labstack/echo/v4"

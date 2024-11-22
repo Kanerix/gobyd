@@ -1,28 +1,47 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"path"
 
-	"github.com/kanerix/gobyd/pkg/gobyd"
+	_ "embed"
+
 	"github.com/kanerix/gobyd/pkg/muex"
 	"github.com/kanerix/gobyd/pkg/rest"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
+//go:embed servers.txt
+var serversRaw string
+
 func main() {
 	e := echo.New()
 
-	e.Use(gobyd.CustomContext)
-	e.Use(middleware.Logger())
+	name := os.Getenv("SERVICE_NAME")
+	if len(name) < 1 {
+		name = "bidding"
+	}
 
-	v1 := e.Group("/api/v1")
+	f, err := os.OpenFile(path.Join("logs", name+".logs"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(fmt.Sprintf("error opening file: %v", err))
+	}
+	defer f.Close()
 
-	rest := rest.NewHandler()
-	rest.Register(v1)
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}\n",
+		Output: f,
+	},
+	))
 
 	muex := muex.NewHandler()
-	muex.Register(v1)
+	muex.Register(e)
+
+	api := e.Group("/api")
+	rest := rest.NewHandler()
+	rest.Register(api)
 
 	addr := os.Getenv("SERVICE_ADDR")
 	if len(addr) < 1 {

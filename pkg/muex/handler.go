@@ -1,11 +1,24 @@
 package muex
 
-import "github.com/google/uuid"
+import (
+	"sync"
+
+	"github.com/google/uuid"
+	"github.com/kanerix/gobyd/pkg/clock"
+)
 
 type Handler struct {
-	pid uuid.UUID
+	sync.Mutex
+	clock  clock.VClock
+	nodeID uuid.UUID
+	queue  []uuid.UUID
 }
 
 func NewHandler() Handler {
-	return Handler{uuid.New()}
+	return Handler{
+		Mutex:  sync.Mutex{},
+		clock:  clock.VClock{},
+		nodeID: uuid.New(),
+		queue:  make([]uuid.UUID, 0),
+	}
 }
