@@ -1,39 +1,13 @@
 services:
-  bidding-1:
+  bidding:
     restart: on-failure
-    container_name: discovery-bidding-1
     build:
-      dockerfile: .
+      dockerfile: Dockerfile
       args:
         - SERVICE_BIN=bidding
-        - SERVICE_NAME=bidding-1
+    deploy:
+      replicas: 3
     ports:
-      - '8081:8080'
+      - "8081-8083:8080"
     volumes:
-      - ./logs/bidding-1.log:/var/app/logs/bidding-1.log
-    
-  bidding-2:
-    restart: on-failure
-    container_name: discovery-bidding-2
-    build:
-      dockerfile: .
-      args:
-        - SERVICE_BIN=bidding
-        - SERVICE_NAME=bidding-2
-    ports:
-      - '8082:8080'
-    volumes:
-      - ./logs/bidding-2.log:/var/app/logs/bidding-2.log
-
-  bidding-3:
-    restart: on-failure
-    container_name: discovery-bidding-3
-    build:
-      dockerfile: .
-      args:
-        - SERVICE_BIN=bidding
-        - SERVICE_NAME=bidding-3
-    ports:
-      - '8083:8080'
-    volumes:
-      - ./logs/bidding-3.log:/var/app/logs/bidding-3.log
+      - ./logs:/var/app/logs/bidding.log
