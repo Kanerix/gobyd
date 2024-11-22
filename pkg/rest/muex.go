@@ -15,7 +15,8 @@ type MuexContext struct {
 // Middleware that initialise the mutual exclusion context.
 func (h *Handler) MuexContext(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		vc, err := clock.FromHeader(c.Request().Header)
+		reqHeader := c.Request().Header
+		vc, err := clock.FromHeader(reqHeader)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
 		}

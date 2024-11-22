@@ -19,8 +19,6 @@ var serversRaw string
 func main() {
 	e := echo.New()
 
-	servers := strings.Split(serversRaw, "\n")
-
 	name := os.Getenv("SERVICE_NAME")
 	if len(name) < 1 {
 		name = "bidding"
@@ -36,6 +34,8 @@ func main() {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 		Output: f,
 	}))
+
+	servers := strings.Split(serversRaw, "\n")
 
 	api := e.Group("/api")
 	rest := rest.NewHandler(servers)
