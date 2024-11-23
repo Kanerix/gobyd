@@ -24,16 +24,7 @@ func main() {
 		name = "bidding"
 	}
 
-	f, err := os.OpenFile(path.Join("logs", name+".logs"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		panic(fmt.Sprintf("error opening file: %v", err))
-	}
-	defer f.Close()
-
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n",
-		Output: f,
-	}))
+	logging(e, name)
 
 	servers := strings.Split(serversRaw, "\n")
 
@@ -47,4 +38,21 @@ func main() {
 	}
 
 	e.Logger.Fatal(e.Start(addr))
+}
+
+func logging(e *echo.Echo, name string) {
+	out := os.Stdout
+	if file := os.Getenv("SERVICE_LOG_TO_FILE"); len(file) > 0 {
+		f, err := os.OpenFile(path.Join("logs", name+".logs"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			panic(fmt.Sprintf("error opening file: %v", err))
+		}
+		defer f.Close()
+		out = f
+	}
+
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}\n",
+		Output: out,
+	}))
 }

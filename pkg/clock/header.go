@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Reads the V-Clock header and returns a vector clock
+// Reads the V-Clock header and returns a updated vector clock
 func FromHeader(h http.Header) (vc VClock, err error) {
 	header, ok := h["V-Clock"]
 	if !ok {
@@ -24,7 +24,7 @@ func FromHeader(h http.Header) (vc VClock, err error) {
 		}
 	}
 
-	vc = NewVClock()
+	vc = New()
 	for _, value := range vcHeaders {
 		data := strings.SplitN(value, "=", 2)
 		if len(data) != 2 {

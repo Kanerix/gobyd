@@ -1,20 +1,39 @@
 package rest
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
-// Handler for placing a bid.
+type (
+	PostBidRequest struct {
+		Bid int `json:"bid"`
+	}
+
+	PostBidResponse struct {
+		Accepted bool `json:"accepted"`
+	}
+
+	GetBidResponse struct {
+		Bid int `json:"bid"`
+	}
+
+	GetResultResponse struct {
+		Bid int `json:"bid"`
+	}
+)
+
 func (h *Handler) PostBid(c echo.Context) error {
-	return nil
+	h.NetworkLock()
+	defer h.NetworkUnlock()
+	return c.JSON(http.StatusOK, PostBidResponse{Accepted: true})
 }
 
-// Handler for getting the current bid.
 func (h *Handler) GetBid(c echo.Context) error {
 	return nil
 }
 
-// Handler that gets the result of an auction.
 func (h *Handler) GetResult(c echo.Context) error {
 	return nil
 }
