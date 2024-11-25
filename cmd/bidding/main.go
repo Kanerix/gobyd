@@ -19,22 +19,14 @@ var serversRaw string
 func main() {
 	e := echo.New()
 
-	name := os.Getenv("SERVICE_NAME")
-	if len(name) < 1 {
-		name = "bidding"
-	}
+	name := GetenvDefault("SERVICE_NAME", "bidding")
+	addr := GetenvDefault("SERVICE_ADDR", "localhost:8080")
+	servers := strings.Split(serversRaw, "\n")
 
 	logging(e, name)
 
-	servers := strings.Split(serversRaw, "\n")
-
-	api := e.Group("/api")
-	rest := rest.NewHandler(servers)
-	rest.Register(api)
-
-	addr := os.Getenv("SERVICE_ADDR")
-	if len(addr) < 1 {
-		addr = "localhost:8080"
+	if handler := rest.NewRestHandler(servers); handler != nil {
+		handler.Register(e)
 	}
 
 	e.Logger.Fatal(e.Start(addr))
@@ -43,11 +35,12 @@ func main() {
 func logging(e *echo.Echo, name string) {
 	out := os.Stdout
 	if file := os.Getenv("SERVICE_LOG_TO_FILE"); len(file) > 0 {
-		f, err := os.OpenFile(path.Join("logs", name+".logs"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		path := path.Join("logs", fmt.Sprintf("%s.logs", name))
+		perms := os.O_RDWR | os.O_CREATE | os.O_APPEND
+		f, err := os.OpenFile(path, perms, 0666)
 		if err != nil {
 			panic(fmt.Sprintf("error opening file: %v", err))
 		}
-		defer f.Close()
 		out = f
 	}
 
@@ -55,4 +48,12 @@ func logging(e *echo.Echo, name string) {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 		Output: out,
 	}))
+}
+
+func GetenvDefault(env string, def string) string {
+	v, ok := os.LookupEnv(env)
+	if !ok {
+		return def
+	}
+	return v
 }

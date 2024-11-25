@@ -7,33 +7,25 @@ import (
 )
 
 type (
-	PostBidRequest struct {
+	Bid struct {
 		Bid int `json:"bid"`
 	}
 
-	PostBidResponse struct {
+	BidAnwser struct {
 		Accepted bool `json:"accepted"`
-	}
-
-	GetBidResponse struct {
-		Bid int `json:"bid"`
-	}
-
-	GetResultResponse struct {
-		Bid int `json:"bid"`
 	}
 )
 
-func (h *Handler) PostBid(c echo.Context) error {
+func (h *RestHandler) PostBid(c echo.Context) error {
 	h.NetworkLock()
 	defer h.NetworkUnlock()
-	return c.JSON(http.StatusOK, PostBidResponse{Accepted: true})
+	return c.JSON(http.StatusOK, BidAnwser{Accepted: true})
 }
 
-func (h *Handler) GetBid(c echo.Context) error {
+func (h *RestHandler) GetBid(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) GetResult(c echo.Context) error {
+func (h *RestHandler) GetResult(c echo.Context) error {
 	return nil
 }

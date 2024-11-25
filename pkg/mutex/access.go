@@ -1,62 +1,69 @@
 package mutex
 
 import (
-	"maps"
 	"net/http"
-	"slices"
+	"sync"
 
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) RequestAccess(c echo.Context) error {
+func (h *MutexHandler) RequestAccess(c echo.Context) error {
 	cc := c.(*Context)
 
-	h.Lock()
-	defer h.Unlock()
+	for {
+		h.Lock()
 
-	if h.LockState != Unlocked {
-		h.TickClock()
-		h.Queue = append(h.Queue, Request{cc.requesterID, maps.Clone(h.Clock)})
-		slices.SortFunc(h.Queue, SortQueue)
-		return c.JSON(200, false)
+		if h.LockState != Unlocked {
+			break
+		}
+
+		requesterTimestamp := h.Clock.GetProcess(cc.requesterID)
+		nodeTimestamp := h.Clock.GetProcess(h.NodeID)
+		if requesterTimestamp < nodeTimestamp {
+			break
+		}
+
+		h.Unlock()
 	}
 
-	return c.JSON(200, false)
+	return c.JSON(200, true)
 }
 
-func (h *Handler) ReleaseAccess(c echo.Context) error {
+func (h *MutexHandler) ReleaseAccess(c echo.Context) error {
 	// cc := c.(*Context)
 
 	h.TickClock()
-	if len(h.Queue) > 0 {
-	}
-
 	return nil
 }
 
-func (h *Handler) Acquire() (bool, error) {
+func (h *MutexHandler) Acquire() {
 	h.Lock()
 	defer h.Unlock()
 
+	wg := sync.WaitGroup{}
+	wg.Add(len(h.Peers))
+
 	for _, peer := range h.Peers {
 		h.Clock.TickProcess(h.NodeID)
+		header := h.Clock.IntoHeader()
 
-		client := http.Client{}
+		go func(wg *sync.WaitGroup, peer string) {
+			client := http.Client{}
 
-		req, err := http.NewRequest("GET", peer+"/api/muex/request", nil)
-		if err != nil {
-			return false, err
-		}
-		req.Header = h.Clock.IntoHeader()
+			req, _ := http.NewRequest("GET", peer+"/api/muex/request", nil)
+			req.Header = header
 
-		res, err := client.Do(req)
-		if err != nil {
-			return false, err
-		}
+			res, err := client.Do(req)
+			if err != nil {
+			}
 
-		if res.StatusCode == 200 {
-		}
+			if res.StatusCode == 200 {
+				wg.Done()
+			}
+		}(&wg, peer)
 	}
 
-	return true, nil
+	wg.Done()
+
+	return
 }

@@ -19,10 +19,10 @@ func New() VClock {
 	return make(VClock)
 }
 
-// Get the tick of a process in the vector clock (if exists).
-func (vc VClock) GetProcess(nodeID uuid.UUID) (uint64, bool) {
-	tick, ok := vc[nodeID]
-	return tick, ok
+// Get the tick of a process in the vector clock.
+func (vc VClock) GetProcess(nodeID uuid.UUID) uint64 {
+	tick := vc[nodeID]
+	return tick
 }
 
 // Increment the tick of a process in the vector clock.

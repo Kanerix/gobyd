@@ -2,10 +2,10 @@ package mutex
 
 import "github.com/labstack/echo/v4"
 
-func (h *Handler) Register(g *echo.Group) {
-	g.Use(h.MutexContext)
+func (h *MutexHandler) Register(e *echo.Echo) {
+	e.Use(h.MutexContext)
 
-	muex := g.Group("/muex")
+	muex := e.Group("/muex")
 	{
 		muex.Use(h.MergeClocks)
 		muex.Use(h.HandlerEvent)

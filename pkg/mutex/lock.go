@@ -1,9 +1,9 @@
 package mutex
 
-func (h *Handler) NetworkLock() {
+func (h *MutexHandler) NetworkLock() {
 	return
 }
 
-func (h *Handler) NetworkUnlock() {
+func (h *MutexHandler) NetworkUnlock() {
 	return
 }

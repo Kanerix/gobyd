@@ -7,7 +7,17 @@ import (
 	"github.com/kanerix/gobyd/pkg/clock"
 )
 
-type LockState int
+type (
+	LockState int
+
+	MutexHandler struct {
+		sync.RWMutex
+		NodeID    uuid.UUID
+		Clock     clock.VClock
+		Peers     []string
+		LockState LockState
+	}
+)
 
 const (
 	Unlocked LockState = iota + 1
@@ -15,27 +25,17 @@ const (
 	Locked
 )
 
-type Handler struct {
-	sync.RWMutex
-	NodeID    uuid.UUID
-	Clock     clock.VClock
-	Peers     []string
-	Queue     []Request
-	LockState LockState
-}
-
-func NewHandler(peers []string) *Handler {
-	return &Handler{
+func NewMutexHandler(peers []string) *MutexHandler {
+	return &MutexHandler{
 		RWMutex:   sync.RWMutex{},
 		NodeID:    uuid.New(),
 		Clock:     clock.New(),
 		Peers:     peers,
-		Queue:     make([]Request, 0),
 		LockState: Unlocked,
 	}
 }
 
-func (h *Handler) TickClock() {
+func (h *MutexHandler) TickClock() {
 	h.Lock()
 	defer h.Unlock()
 	h.Clock.TickProcess(h.NodeID)

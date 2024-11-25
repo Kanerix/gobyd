@@ -2,12 +2,12 @@ package rest
 
 import "github.com/kanerix/gobyd/pkg/mutex"
 
-type Handler struct {
-	*mutex.Handler
+type RestHandler struct {
+	*mutex.MutexHandler
 }
 
-func NewHandler(peers []string) Handler {
-	return Handler{
-		Handler: mutex.NewHandler(peers),
+func NewRestHandler(peers []string) *RestHandler {
+	return &RestHandler{
+		MutexHandler: mutex.NewMutexHandler(peers),
 	}
 }

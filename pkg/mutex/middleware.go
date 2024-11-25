@@ -15,7 +15,7 @@ type Context struct {
 	requesterClock clock.VClock
 }
 
-func (h *Handler) MutexContext(next echo.HandlerFunc) echo.HandlerFunc {
+func (h *MutexHandler) MutexContext(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		reqHeader := c.Request().Header
 
@@ -33,8 +33,9 @@ func (h *Handler) MutexContext(next echo.HandlerFunc) echo.HandlerFunc {
 		res := next(cc)
 
 		h.RLock()
+		defer h.RUnlock()
+
 		vcHeader := h.Clock.IntoHeader()
-		h.RUnlock()
 		resHeader := c.Response().Header()
 		for key, values := range vcHeader {
 			for _, value := range values {
@@ -46,21 +47,21 @@ func (h *Handler) MutexContext(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (h *Handler) MergeClocks(next echo.HandlerFunc) echo.HandlerFunc {
+func (h *MutexHandler) MergeClocks(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cc := c.(*Context)
-
 		h.Lock()
 		h.Clock.Merge(cc.requesterClock)
 		h.Unlock()
-
 		return next(cc)
 	}
 }
 
-func (h *Handler) HandlerEvent(next echo.HandlerFunc) echo.HandlerFunc {
+func (h *MutexHandler) HandlerEvent(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		h.Lock()
 		h.TickClock()
+		h.Unlock()
 		return next(c)
 	}
 }
